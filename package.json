@@ -1,0 +1,21 @@
+{
+  "name": "hisho-bot",
+  "version": "1.0.0",
+  "description": "Server Bot for JPCS-MU Discord Server",
+  "main": "index.mjs",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "run": "node --es-module-specifier-resolution=node index.js"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
+  "author": "zvxayr",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "discord.js": "^13.6.0",
+    "dotenv": "^16.0.0"
+  }
+}
