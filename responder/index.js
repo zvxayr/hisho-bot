@@ -11,7 +11,7 @@ class CommandNotFound extends Error {
 let commands = [
     {
         command: 'say',
-        parameters: /(.+)?/,
+        parameters: /^(.+)?$/s,
         async *execute (something) {
             yield {
                 type: 'Send',
@@ -26,7 +26,7 @@ let alias = {
 }
 
 const decomposeCommand = (full_command) => {
-    const format = /(\S+)?(?:\s+)?(.*)/;
+    const format = /^(\S+)?(?:\s+)?(.*)$/s;
     const [, test_command, full_argument] = format.exec(full_command);
     return { test_command, full_argument };
 }
