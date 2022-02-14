@@ -15,8 +15,10 @@ client.on('messageCreate', async message => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     try {
-        const full_command =  message.content.slice(prefix.length);
-        for await (const { type, payload } of responder(full_command)) {
+        const full_command = message.content.slice(prefix.length);
+        const context = message; // TODO: extract only useful info from message
+                                 //       as the context.
+        for await (const { type, payload } of responder(context, full_command)) {
             actions[type](message, payload);
         }
     } catch (error) {

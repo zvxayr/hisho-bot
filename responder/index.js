@@ -12,7 +12,7 @@ let commands = [
     {
         command: 'say',
         parameters: /^(.+)?$/s,
-        async *execute (something) {
+        async *execute (_, [ something ]) {
             yield {
                 type: 'Send',
                 payload: something ? `${something}!` : 'You need to say something.'
@@ -39,12 +39,12 @@ const unalias = (command) => {
 const findCommand = (command) => command && commands
     .find(({ command: cmd }) => cmd == command);
 
-const responder = (full_command) => {
+const responder = (context, full_command) => {
     const { command, full_argument } = decomposeCommand(full_command);
     const { parameters, execute } = findCommand(unalias(command))
         ?? raise(new CommandNotFound(test_command));
     const args = parameters.exec(full_argument).slice(1);
-    return execute(...args);
+    return execute(context, args);
 }
 
 export default responder;
