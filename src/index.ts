@@ -1,4 +1,7 @@
-import { Client, Intents } from 'discord.js';
+import sourceMapSupport from 'source-map-support';
+sourceMapSupport.install();
+
+import { Client, Intents, Message } from 'discord.js';
 import responder from './responder/index.js';
 import dotenv from 'dotenv';
 dotenv.config();
@@ -7,8 +10,12 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 let prefix = '&';
 
-const actions = {
-    'Send': (message, text) => message.channel.send(text)
+interface Action {
+    [key: string]: (message : Message, text : string ) => void
+}
+
+const actions : Action = {
+    'Send': (message, text) => { message.channel.send(text); }
 };
 
 client.on('messageCreate', async message => {
@@ -22,8 +29,10 @@ client.on('messageCreate', async message => {
             actions[type](message, payload);
         }
     } catch (error) {
-        console.error(error);
-        message.channel.send(error.message);
+        if (error instanceof Error) {
+            console.error(error);
+            message.channel.send(error.message);
+        }
     }
 });
 

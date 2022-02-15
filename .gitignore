@@ -77,3 +77,6 @@ typings/
 
 # code editor config
 .vscode/
+
+# distribution folder
+dist/

@@ -1,18 +1,27 @@
 import { raise } from "../utils";
 
 class CommandNotFound extends Error {
-    constructor(command) {
+
+    command : string;
+
+    constructor(command : string) {
         super(`The command \`${command}\` is not found.`);
         this.command = command;
         this.name = this.constructor.name;
     }
 }
 
-let commands = [
+interface Command {
+    command: string,
+    parameters: RegExp,
+    execute: (context : object, args? : string[]) => AsyncGenerator<{ type: string, payload: string }, { type: string, payload: string } | void>
+}
+
+let commands : Command[] = [
     {
         command: 'say',
         parameters: /^(.+)?$/s,
-        async *execute (_, [ something ]) {
+        async *execute (_, [ something ] = []) {
             yield {
                 type: 'Send',
                 payload: something ? `${something}!` : 'You need to say something.'
@@ -21,29 +30,35 @@ let commands = [
     }
 ];
 
-let alias = {
+interface Alias {
+    [key: string]: string
+}
+
+let alias : Alias = {
     'utter': 'say'
 }
 
-const decomposeCommand = (full_command) => {
+const decomposeCommand = (full_command : string) => {
     const format = /^(\S+)?(?:\s+)?(.*)$/s;
-    const [, command, full_argument] = format.exec(full_command);
+    const result = format.exec(full_command) ?? [];
+    const [, command = '', full_argument = ''] = result;
     return { command, full_argument };
 }
 
-const unalias = (command) => {
+const unalias = (command : string) => {
     const lower_case_command = command?.toLowerCase();
     return alias[lower_case_command] ?? lower_case_command;
 }
 
-const findCommand = (command) => command && commands
+const findCommand = (command : string) => commands
     .find(({ command: cmd }) => cmd == command);
 
-const responder = (context, full_command) => {
+const responder = (context : object, full_command : string) => {
     const { command, full_argument } = decomposeCommand(full_command);
     const { parameters, execute } = findCommand(unalias(command))
-        ?? raise(new CommandNotFound(test_command));
-    const args = parameters.exec(full_argument).slice(1);
+        ?? raise(new CommandNotFound(command));
+    const args = parameters.exec(full_argument)?.slice(1);
+
     return execute(context, args);
 }
 
