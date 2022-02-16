@@ -26,14 +26,14 @@ interface Context {
 interface Command {
     command: string,
     parameters: RegExp,
-    execute: (context: Context, args?: string[]) => AsyncGenerator<Action, Action | void>
+    execute: (context: Context, ...args: string[]) => AsyncGenerator<Action, Action | void>
 }
 
 let commands: Command[] = [
     {
         command: 'say',
         parameters: /^(.+)?$/s,
-        async *execute(_, [something] = []) {
+        async *execute(_, something) {
             yield {
                 type: 'Send',
                 payload: something ? `${something}!` : 'You need to say something.'
@@ -69,9 +69,9 @@ const responder = (context: Context, full_command: string) => {
     const { command, full_argument } = decomposeCommand(full_command);
     const { parameters, execute } = findCommand(unalias(command))
         ?? raise(new CommandNotFound(command));
-    const args = parameters.exec(full_argument)?.slice(1);
+    const args = parameters.exec(full_argument)?.slice(1) ?? [];
 
-    return execute(context, args);
+    return execute(context, ...args);
 }
 
 export default responder;
