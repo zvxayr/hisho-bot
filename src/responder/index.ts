@@ -11,10 +11,22 @@ class CommandNotFound extends Error {
     }
 }
 
+interface Action {
+    type: string,
+    payload: string
+}
+
+interface Context {
+    sender: {
+        id: string,
+        name: string,
+    }
+}
+
 interface Command {
     command: string,
     parameters: RegExp,
-    execute: (context : object, args? : string[]) => AsyncGenerator<{ type: string, payload: string }, { type: string, payload: string } | void>
+    execute: (context : Context, args? : string[]) => AsyncGenerator<Action, Action | void>
 }
 
 let commands : Command[] = [
@@ -53,7 +65,7 @@ const unalias = (command : string) => {
 const findCommand = (command : string) => commands
     .find(({ command: cmd }) => cmd == command);
 
-const responder = (context : object, full_command : string) => {
+const responder = (context : Context, full_command : string) => {
     const { command, full_argument } = decomposeCommand(full_command);
     const { parameters, execute } = findCommand(unalias(command))
         ?? raise(new CommandNotFound(command));
@@ -63,3 +75,6 @@ const responder = (context : object, full_command : string) => {
 }
 
 export default responder;
+export {
+    Context,
+};
