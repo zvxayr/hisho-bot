@@ -1,4 +1,4 @@
-let raise = (error : Error) => { throw error };
+let raise = (error: Error) => { throw error };
 
 export {
     raise

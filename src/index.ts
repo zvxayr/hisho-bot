@@ -11,14 +11,14 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 let prefix = '&';
 
 interface ActionConsumer {
-    [key: string]: (message : Message, text : string ) => void
+    [key: string]: (message: Message, text: string) => void
 }
 
-const actionConsumer : ActionConsumer = {
+const actionConsumer: ActionConsumer = {
     'Send': (message, text) => { message.channel.send(text); }
 };
 
-const getContext = (message : Message) : Context => {
+const getContext = (message: Message): Context => {
     return {
         sender: {
             id: message.author.id,
