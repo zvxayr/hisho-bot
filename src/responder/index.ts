@@ -11,6 +11,10 @@ class CommandNotFound extends Error {
     }
 }
 
+interface StringMap {
+    [key: string]: string
+}
+
 interface Action {
     type: string,
     payload: string
@@ -25,15 +29,15 @@ interface Context {
 
 interface Command {
     command: string,
-    parameters: RegExp,
-    execute: (context: Context, ...args: string[]) => AsyncGenerator<Action, Action | void>
+    parameterFormat: RegExp,
+    execute: (context: Context, args: StringMap) => AsyncGenerator<Action, Action | void>
 }
 
 let commands: Command[] = [
     {
         command: 'say',
-        parameters: /^(.+)?$/s,
-        async *execute(_, something) {
+        parameterFormat: /^(?<something>.+)?$/s,
+        async *execute(_, { something }) {
             yield {
                 type: 'Send',
                 payload: something ? `${something}!` : 'You need to say something.'
@@ -42,18 +46,18 @@ let commands: Command[] = [
     }
 ];
 
-interface Alias {
-    [key: string]: string
-}
-
-let alias: Alias = {
+let alias: StringMap = {
     'utter': 'say'
 }
 
-const decomposeCommand = (full_command: string) => {
-    const format = /^(\S+)?(?:\s+)?(.*)$/s;
-    const result = format.exec(full_command) ?? [];
-    const [, command = '', full_argument = ''] = result;
+const getPatternGroupMatches = (pattern: RegExp, str: string) => {
+    return pattern.exec(str)?.groups ?? {};
+}
+
+const decomposeCommandString = (full_command: string) => {
+    const format = /^(?<command>\S+)?(?:\s+)?(?<full_argument>.*)$/s;
+    const result = getPatternGroupMatches(format, full_command);
+    const { command, full_argument } = result;
     return { command, full_argument };
 }
 
@@ -66,12 +70,12 @@ const findCommand = (command: string) => commands
     .find(({ command: cmd }) => cmd == command);
 
 const responder = (context: Context, full_command: string) => {
-    const { command, full_argument } = decomposeCommand(full_command);
-    const { parameters, execute } = findCommand(unalias(command))
+    const { command, full_argument } = decomposeCommandString(full_command);
+    const { parameterFormat: parameters, execute } = findCommand(unalias(command))
         ?? raise(new CommandNotFound(command));
-    const args = parameters.exec(full_argument)?.slice(1) ?? [];
+    const args = getPatternGroupMatches(parameters, full_argument);
 
-    return execute(context, ...args);
+    return execute(context, args);
 }
 
 export default responder;
