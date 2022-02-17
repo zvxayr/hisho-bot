@@ -6,16 +6,20 @@ import responder, { Context } from './responder';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] });
+const client = new Client({
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
+});
 
 let prefix = '&';
 
 interface ActionConsumer {
-    [key: string]: (message: Message, text: string) => void
+    [key: string]: (message: Message, text: string) => void;
 }
 
 const actionConsumer: ActionConsumer = {
-    'Send': (message, text) => { message.channel.send(text); }
+    Send: (message, text) => {
+        message.channel.send(text);
+    },
 };
 
 const getContext = (message: Message): Context => {
@@ -23,11 +27,11 @@ const getContext = (message: Message): Context => {
         sender: {
             id: message.author.id,
             name: message.author.username,
-        }
-    }
-}
+        },
+    };
+};
 
-client.on('messageCreate', async message => {
+client.on('messageCreate', async (message) => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     try {
