@@ -16,7 +16,7 @@ interface StringMap {
 
 interface Action {
     type: string;
-    payload: string;
+    payload: any;
 }
 
 interface Context {
@@ -41,7 +41,7 @@ let commands: Command[] = [
         parameterFormat: /^(?<something>.+)?$/s,
         async *execute(_, { something }) {
             yield {
-                type: 'Send',
+                type: 'send',
                 payload: something ? `${something}!` : 'You need to say something.',
             };
         },

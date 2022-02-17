@@ -13,12 +13,21 @@ const client = new Client({
 let prefix = '&';
 
 interface ActionConsumer {
-    [key: string]: (message: Message, text: string) => void;
+    [key: string]: (message: Message, payload?: any) => void;
 }
 
 const actionConsumer: ActionConsumer = {
-    Send: (message, text) => {
+    send: (message, text: string) => {
         message.channel.send(text);
+    },
+    reply: (message, text: string) => {
+        message.reply(text);
+    },
+    react: (message, emoji: string) => {
+        message.react(emoji);
+    },
+    delete: (message) => {
+        message.delete();
     },
 };
 
