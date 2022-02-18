@@ -12,25 +12,6 @@ const client = new Client({
 
 let prefix = '&';
 
-interface ActionConsumer {
-    [key: string]: (message: Message, payload?: any) => void;
-}
-
-const actionConsumer: ActionConsumer = {
-    send: (message, text: string) => {
-        message.channel.send(text);
-    },
-    reply: (message, text: string) => {
-        message.reply(text);
-    },
-    react: (message, emoji: string) => {
-        message.react(emoji);
-    },
-    delete: (message) => {
-        message.delete();
-    },
-};
-
 const getContext = (message: Message): Context => {
     return {
         sender: {
@@ -46,8 +27,8 @@ client.on('messageCreate', async (message) => {
     try {
         const full_command = message.content.slice(prefix.length);
         const context = getContext(message);
-        for await (const { type, payload } of responder(context, full_command)) {
-            actionConsumer[type](message, payload);
+        for await (const action of responder(context, full_command)) {
+            action(message);
         }
     } catch (error) {
         if (error instanceof Error) {

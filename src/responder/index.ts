@@ -1,4 +1,5 @@
 import { raise } from '../utils';
+import { MessageAction, Send } from './actions';
 
 class CommandNotFound extends Error {
     command: string;
@@ -14,11 +15,6 @@ interface StringMap {
     [key: string]: string;
 }
 
-interface Action {
-    type: string;
-    payload: any;
-}
-
 interface Context {
     sender: {
         id: string;
@@ -32,7 +28,7 @@ interface Command {
     execute: (
         context: Context,
         args: StringMap,
-    ) => AsyncGenerator<Action, Action | void>;
+    ) => AsyncGenerator<MessageAction, MessageAction | void>;
 }
 
 let commands: Command[] = [
@@ -40,10 +36,7 @@ let commands: Command[] = [
         command: 'say',
         parameterFormat: /^(?<something>.+)?$/s,
         async *execute(_, { something }) {
-            yield {
-                type: 'send',
-                payload: something ? `${something}!` : 'You need to say something.',
-            };
+            yield Send(something ? `${something}!` : 'You need to say something.');
         },
     },
 ];
