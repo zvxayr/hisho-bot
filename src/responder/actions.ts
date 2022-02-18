@@ -19,4 +19,9 @@ const Delete = (): MessageAction => (message) => {
 };
 
 export { MessageAction };
-export { Send, Reply, React, Delete };
+export {
+    Send,
+    Reply,
+    React,
+    Delete,
+};

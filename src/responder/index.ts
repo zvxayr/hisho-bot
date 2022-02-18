@@ -35,7 +35,7 @@ const commands: Command[] = [
     {
         command: 'say',
         parameterFormat: /^(?<something>.+)?$/s,
-        async *execute(_, { something }) {
+        async* execute(_, { something }) {
             yield Send(something ? `${something}!` : 'You need to say something.');
         },
     },
@@ -45,30 +45,29 @@ const alias: StringMap = {
     utter: 'say',
 };
 
-const getPatternGroupMatches = (pattern: RegExp, str: string) => {
-    return pattern.exec(str)?.groups ?? {};
-};
+const getPatternGroupMatches = (pattern: RegExp, str: string) => pattern.exec(str)?.groups ?? {};
 
-const decomposeCommandString = (full_command: string) => {
-    const format = /^(?<command>\S+)?(?:\s+)?(?<full_argument>.*)$/s;
-    const result = getPatternGroupMatches(format, full_command);
-    const { command, full_argument } = result;
-    return { command, full_argument };
+const decomposeCommandString = (fullCommand: string) => {
+    const format = /^(?<command>\S+)?(?:\s+)?(?<fullArgument>.*)$/s;
+    const result = getPatternGroupMatches(format, fullCommand);
+    const { command, fullArgument } = result;
+    return { command, fullArgument };
 };
 
 const unalias = (command: string) => {
-    const lower_case_command = command?.toLowerCase();
-    return alias[lower_case_command] ?? lower_case_command;
+    const lowerCaseCommand = command?.toLowerCase();
+    return alias[lowerCaseCommand] ?? lowerCaseCommand;
 };
 
-const findCommand = (command: string) =>
-    commands.find(({ command: cmd }) => cmd == command);
+const findCommand = (command: string) => commands.find(({ command: cmd }) => cmd === command);
 
-const responder = (context: Context, full_command: string) => {
-    const { command, full_argument } = decomposeCommandString(full_command);
-    const { parameterFormat: parameters, execute } =
-        findCommand(unalias(command)) ?? raise(new CommandNotFound(command));
-    const args = getPatternGroupMatches(parameters, full_argument);
+const responder = (context: Context, fullCommand: string) => {
+    const { command, fullArgument } = decomposeCommandString(fullCommand);
+    const { parameterFormat, execute } = (
+        findCommand(unalias(command))
+        ?? raise(new CommandNotFound(command))
+    );
+    const args = getPatternGroupMatches(parameterFormat, fullArgument);
 
     return execute(context, args);
 };

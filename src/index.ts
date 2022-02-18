@@ -1,9 +1,9 @@
 import sourceMapSupport from 'source-map-support';
-sourceMapSupport.install();
-
 import { Client, Intents, Message } from 'discord.js';
-import responder, { Context } from './responder';
 import dotenv from 'dotenv';
+import responder, { Context } from './responder';
+
+sourceMapSupport.install();
 dotenv.config();
 
 const client = new Client({
@@ -12,27 +12,24 @@ const client = new Client({
 
 const prefix = '&';
 
-const getContext = (message: Message): Context => {
-    return {
-        sender: {
-            id: message.author.id,
-            name: message.author.username,
-        },
-    };
-};
+const getContext = (message: Message): Context => ({
+    sender: {
+        id: message.author.id,
+        name: message.author.username,
+    },
+});
 
 client.on('messageCreate', async (message) => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
     try {
-        const full_command = message.content.slice(prefix.length);
+        const fullCommand = message.content.slice(prefix.length);
         const context = getContext(message);
-        for await (const action of responder(context, full_command)) {
+        for await (const action of responder(context, fullCommand)) {
             action(message);
         }
     } catch (error) {
         if (error instanceof Error) {
-            console.error(error);
             message.channel.send(error.message);
         }
     }
