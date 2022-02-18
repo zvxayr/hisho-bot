@@ -31,7 +31,7 @@ interface Command {
     ) => AsyncGenerator<MessageAction, MessageAction | void>;
 }
 
-let commands: Command[] = [
+const commands: Command[] = [
     {
         command: 'say',
         parameterFormat: /^(?<something>.+)?$/s,
@@ -41,7 +41,7 @@ let commands: Command[] = [
     },
 ];
 
-let alias: StringMap = {
+const alias: StringMap = {
     utter: 'say',
 };
 

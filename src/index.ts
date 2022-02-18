@@ -10,7 +10,7 @@ const client = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
 });
 
-let prefix = '&';
+const prefix = '&';
 
 const getContext = (message: Message): Context => {
     return {
