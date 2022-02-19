@@ -1,7 +1,7 @@
 import sourceMapSupport from 'source-map-support';
-import { Client, Intents, Message } from 'discord.js';
+import { Client, Intents } from 'discord.js';
 import dotenv from 'dotenv';
-import responder, { Context } from './responder';
+import responder from './responder';
 
 sourceMapSupport.install();
 dotenv.config();
@@ -11,13 +11,6 @@ const client = new Client({
 });
 
 const prefix = '&';
-
-const getContext = (message: Message): Context => ({
-    sender: {
-        id: message.author.id,
-        name: message.author.username,
-    },
-});
 
 client.on('ready', () => {
     // eslint-disable-next-line no-console
@@ -29,10 +22,7 @@ client.on('messageCreate', async (message) => {
 
     try {
         const fullCommand = message.content.slice(prefix.length);
-        const context = getContext(message);
-        for await (const action of responder(context, fullCommand)) {
-            action(message);
-        }
+        await responder(fullCommand)(message);
     } catch (error) {
         if (error instanceof Error) {
             message.channel.send(error.message);

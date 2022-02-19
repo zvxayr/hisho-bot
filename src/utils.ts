@@ -1,4 +1,5 @@
-let raise = (error: Error) => {
+/* eslint-disable import/prefer-default-export */
+const raise = (error: Error) => {
     throw error;
 };
 

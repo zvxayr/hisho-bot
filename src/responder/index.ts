@@ -1,5 +1,5 @@
+import { Message } from 'discord.js';
 import { raise } from '../utils';
-import { MessageAction, Send } from './actions';
 
 class CommandNotFound extends Error {
     command: string;
@@ -15,28 +15,21 @@ interface StringMap {
     [key: string]: string;
 }
 
-interface Context {
-    sender: {
-        id: string;
-        name: string;
-    };
-}
-
 interface Command {
     command: string;
     parameterFormat: RegExp;
     execute: (
-        context: Context,
+        message: Message,
         args: StringMap,
-    ) => AsyncGenerator<MessageAction, MessageAction | void>;
+    ) => Promise<void>;
 }
 
 const commands: Command[] = [
     {
         command: 'say',
-        parameterFormat: /^(?<something>.+)?$/s,
-        execute: async function* (_, { something }) {
-            yield Send(something ? `${something}!` : 'You need to say something.');
+        parameterFormat: /^(?<text>.+)?$/s,
+        execute: async (message, { text }) => {
+            await message.channel.send(text ? `${text}!` : 'You need to say something.');
         },
     },
 ];
@@ -61,7 +54,7 @@ const unalias = (command: string) => {
 
 const findCommand = (command: string) => commands.find(({ command: cmd }) => cmd === command);
 
-const responder = (context: Context, fullCommand: string) => {
+const responder = (fullCommand: string) => {
     const { command, fullArgument } = decomposeCommandString(fullCommand);
     const { parameterFormat, execute } = (
         findCommand(unalias(command))
@@ -69,8 +62,7 @@ const responder = (context: Context, fullCommand: string) => {
     );
     const args = getPatternGroupMatches(parameterFormat, fullArgument);
 
-    return execute(context, args);
+    return (message: Message) => execute(message, args);
 };
 
 export default responder;
-export { Context };
