@@ -35,7 +35,7 @@ const commands: Command[] = [
     {
         command: 'say',
         parameterFormat: /^(?<something>.+)?$/s,
-        async* execute(_, { something }) {
+        execute: async function* (_, { something }) {
             yield Send(something ? `${something}!` : 'You need to say something.');
         },
     },

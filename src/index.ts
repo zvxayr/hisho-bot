@@ -19,6 +19,11 @@ const getContext = (message: Message): Context => ({
     },
 });
 
+client.on('ready', () => {
+    // eslint-disable-next-line no-console
+    console.log(`Logged in as ${client.user?.tag}!`);
+});
+
 client.on('messageCreate', async (message) => {
     if (!message.content.startsWith(prefix) || message.author.bot) return;
 
