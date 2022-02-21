@@ -4,10 +4,13 @@ import { raise } from '../utils';
 class CommandNotFound extends Error {
     command: string;
 
-    constructor(command: string) {
+    source: Message;
+
+    constructor(command: string, message: Message) {
         super(`The command \`${command}\` is not found.`);
         this.command = command;
         this.name = this.constructor.name;
+        this.source = message;
     }
 }
 
@@ -58,10 +61,11 @@ const responder = (message: Message) => {
     const { command, fullArgument } = decomposeCommandString(message.content);
     const { parameterFormat, execute } = (
         findCommand(unalias(command))
-        ?? raise(new CommandNotFound(command))
+        ?? raise(new CommandNotFound(command, message))
     );
     const args = getPatternGroupMatches(parameterFormat, fullArgument);
     return execute(message, args);
 };
 
 export default responder;
+export { CommandNotFound };
