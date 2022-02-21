@@ -28,8 +28,7 @@ const noBots: Transformer<Listener<Message>> = (listener) => (message) => {
 
 const usePrefix = (getPrefix: (message: Message) => string): Transformer<Listener<Message>> => (
     (listener) => (message) => {
-        if (!message.content.startsWith(getPrefix(message))) return;
-        listener(message);
+        if (message.content.startsWith(getPrefix(message))) listener(message);
     }
 );
 
