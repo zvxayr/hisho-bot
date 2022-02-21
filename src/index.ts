@@ -1,8 +1,8 @@
 import sourceMapSupport from 'source-map-support';
 import { Client, Intents, Message } from 'discord.js';
 import dotenv from 'dotenv';
-import responder from './responder';
-import { compose, Transformer } from './utils';
+import responder, { CommandNotFound } from './responder';
+import { compose, swallow, Transformer } from './utils';
 
 sourceMapSupport.install();
 dotenv.config();
@@ -32,17 +32,10 @@ const usePrefix = (getPrefix: (message: Message) => string): Transformer<Listene
     }
 );
 
-client.on('messageCreate', compose(
-    noBots,
-    usePrefix(() => '&'),
-)(async (message) => {
-    try {
-        await responder(message);
-    } catch (error) {
-        if (error instanceof Error) {
-            message.channel.send(error.message);
-        }
-    }
-}));
+const safeResponder = swallow(CommandNotFound)(
+    ({ source, message }) => { source.channel.send(message); },
+)(responder);
+
+client.on('messageCreate', compose(noBots, usePrefix(() => '&'))(safeResponder));
 
 client.login(process.env.token);
