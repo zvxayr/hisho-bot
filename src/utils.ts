@@ -3,4 +3,10 @@ const raise = (error: Error) => {
     throw error;
 };
 
-export { raise };
+type Transformer<Fn extends Function> = (fn: Fn) => Fn;
+
+const compose = <Inner extends Function>(...fns: Transformer<Inner>[]) => (
+    (x: Inner) => fns.reduceRight((v, f) => f(v), x)
+);
+
+export { raise, compose, Transformer };
