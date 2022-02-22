@@ -1,20 +1,8 @@
 import { Message } from 'discord.js';
 import commands from '../commands';
 import { compose, raise, swallow } from '../utils';
+import { CommandNotFound } from './exceptions';
 import { noBots, usePrefix } from './guards';
-
-class CommandNotFound extends Error {
-    command: string;
-
-    source: Message;
-
-    constructor(command: string, message: Message) {
-        super(`The command \`${command}\` is not found.`);
-        this.command = command;
-        this.name = this.constructor.name;
-        this.source = message;
-    }
-}
 
 interface StringMap {
     [key: string]: string;
@@ -55,6 +43,4 @@ const safeCommandResponder = swallow(CommandNotFound)(({ source, message }) => {
 })(commandResponder);
 
 export const messageCreateResponder = compose(noBots, usePrefix.fixed('&'))(safeCommandResponder);
-export default {
-    messageCreateResponder,
-};
+export default {};
