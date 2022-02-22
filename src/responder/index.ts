@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import commands from '../commands';
 import { raise } from '../utils';
 
 class CommandNotFound extends Error {
@@ -17,25 +18,6 @@ class CommandNotFound extends Error {
 interface StringMap {
     [key: string]: string;
 }
-
-interface Command {
-    command: string;
-    parameterFormat: RegExp;
-    execute: (
-        message: Message,
-        args: StringMap,
-    ) => Promise<void>;
-}
-
-const commands: Command[] = [
-    {
-        command: 'say',
-        parameterFormat: /^(?<text>.+)?$/s,
-        execute: async (message, { text }) => {
-            await message.channel.send(text ? `${text}!` : 'You need to say something.');
-        },
-    },
-];
 
 const alias: StringMap = {
     utter: 'say',
