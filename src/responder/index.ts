@@ -37,7 +37,7 @@ const unalias = (command: string) => {
     return alias[lowerCaseCommand] ?? lowerCaseCommand;
 };
 
-const findCommand = (command: string) => commands.find(({ command: cmd }) => cmd === command);
+const findCommand = (command: string) => commands.find(({ name }) => name === command);
 
 const responder = (message: Message) => {
     const { command, fullArgument } = decomposeCommandString(message.content);

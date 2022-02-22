@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 
 export interface Command {
-    command: string;
+    name: string;
     parameterFormat: RegExp;
     execute: (
         message: Message,
