@@ -20,15 +20,12 @@ const swallow = (
     )
 );
 
-type Transformer<Value> = (value: Value) => Value;
-
-const compose = <Inner extends Function>(...fns: Transformer<Inner>[]) => (
-    (x: Inner) => fns.reduceRight((v, f) => f(v), x)
+const compose = <Fn extends Function>(...fns: ((input: Fn) => Fn)[]) => (
+    (x: Fn) => fns.reduceRight((v, f) => f(v), x)
 );
 
 export {
     raise,
     compose,
     swallow,
-    Transformer,
 };

@@ -2,7 +2,7 @@ import sourceMapSupport from 'source-map-support';
 import { Client, Intents, Message } from 'discord.js';
 import dotenv from 'dotenv';
 import responder, { CommandNotFound } from './responder';
-import { compose, swallow, Transformer } from './utils';
+import { compose, swallow } from './utils';
 
 sourceMapSupport.install();
 dotenv.config();
@@ -20,7 +20,8 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user?.tag}!`);
 });
 
-type Listener<Event> = (event: Event) => void | Promise<void>;
+type Transformer<Value> = (value: Value) => Value;
+type Listener<Event> = (event: Event) => void;
 
 const noBots: Transformer<Listener<Message>> = (listener) => (message) => {
     if (!message.author.bot) listener(message);
