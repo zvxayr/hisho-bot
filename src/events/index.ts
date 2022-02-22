@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import commands from '../commands';
-import { raise } from '../utils';
+import { compose, raise, swallow } from '../utils';
 
 class CommandNotFound extends Error {
     command: string;
@@ -39,7 +39,7 @@ const unalias = (command: string) => {
 
 const findCommand = (command: string) => commands.find(({ name }) => name === command);
 
-const responder = (message: Message) => {
+const commandResponder = (message: Message) => {
     const { command, fullArgument } = decomposeCommandString(message.content);
     const { parameterFormat, execute } = (
         findCommand(unalias(command))
@@ -49,5 +49,24 @@ const responder = (message: Message) => {
     return execute(message, args);
 };
 
-export default responder;
-export { CommandNotFound };
+type Transformer<Value> = (value: Value) => Value;
+type Listener<Event> = (event: Event) => void;
+
+const noBots: Transformer<Listener<Message>> = (listener) => (message) => {
+    if (!message.author.bot) listener(message);
+};
+
+const usePrefix = (getPrefix: (message: Message) => string): Transformer<Listener<Message>> => (
+    (listener) => (message) => {
+        if (message.content.startsWith(getPrefix(message))) listener(message);
+    }
+);
+
+const safeCommandResponder = swallow(CommandNotFound)(
+    ({ source, message }) => { source.channel.send(message); },
+)(commandResponder);
+
+export const messageCreateResponder = compose(noBots, usePrefix(() => '&'))(safeCommandResponder);
+export default {
+    messageCreateResponder,
+};
