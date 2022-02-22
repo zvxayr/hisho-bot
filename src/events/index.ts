@@ -50,9 +50,9 @@ const commandResponder = (message: Message) => {
     return execute(message, args);
 };
 
-const safeCommandResponder = swallow(CommandNotFound)(
-    ({ source, message }) => { source.channel.send(message); },
-)(commandResponder);
+const safeCommandResponder = swallow(CommandNotFound)(({ source, message }) => {
+    source.channel.send(message);
+})(commandResponder);
 
 export const messageCreateResponder = compose(noBots, usePrefix.fixed('&'))(safeCommandResponder);
 export default {
