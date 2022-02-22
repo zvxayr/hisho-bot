@@ -1,6 +1,7 @@
 import { Message } from 'discord.js';
 import commands from '../commands';
 import { compose, raise, swallow } from '../utils';
+import { noBots, usePrefix } from './guards';
 
 class CommandNotFound extends Error {
     command: string;
@@ -49,24 +50,11 @@ const commandResponder = (message: Message) => {
     return execute(message, args);
 };
 
-type Transformer<Value> = (value: Value) => Value;
-type Listener<Event> = (event: Event) => void;
-
-const noBots: Transformer<Listener<Message>> = (listener) => (message) => {
-    if (!message.author.bot) listener(message);
-};
-
-const usePrefix = (getPrefix: (message: Message) => string): Transformer<Listener<Message>> => (
-    (listener) => (message) => {
-        if (message.content.startsWith(getPrefix(message))) listener(message);
-    }
-);
-
 const safeCommandResponder = swallow(CommandNotFound)(
     ({ source, message }) => { source.channel.send(message); },
 )(commandResponder);
 
-export const messageCreateResponder = compose(noBots, usePrefix(() => '&'))(safeCommandResponder);
+export const messageCreateResponder = compose(noBots, usePrefix.fixed('&'))(safeCommandResponder);
 export default {
     messageCreateResponder,
 };
