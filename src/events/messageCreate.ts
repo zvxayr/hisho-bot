@@ -41,5 +41,5 @@ const safeCommandResponder = swallow(CommandNotFound)(({ source, message }) => {
     source.channel.send(message);
 })(commandResponder);
 
-const messageCreateHandler = compose(noBots, usePrefix.fixed('&'))(safeCommandResponder);
+const messageCreateHandler = compose(noBots, usePrefix.fromDatabase)(safeCommandResponder);
 export default messageCreateHandler;
