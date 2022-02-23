@@ -21,7 +21,6 @@
         "@typescript-eslint/indent": ["error", 4],
         "no-restricted-syntax": "off",
         "func-names": ["error", "as-needed"],
-        "object-shorthand": ["error", "consistent-as-needed"],
         "no-param-reassign": "warn"
     }
 }
