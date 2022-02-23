@@ -9,9 +9,9 @@ const rescue = (error: Error, type: new (...args: any[]) => Error) => {
 
 const swallow = (
     <E extends Error>(type: new (...args: any[]) => E) => (fail: (err: E) => void) => (
-        <Args extends any[]>(fn: (...args: Args) => void) => (...args: Args) => {
+        <Args extends any[]>(fn: (...args: Args) => Promise<void>) => async (...args: Args) => {
             try {
-                fn(...args);
+                await fn(...args);
             } catch (error: any) {
                 rescue(error, type);
                 fail(error);
