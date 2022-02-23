@@ -8,19 +8,19 @@ export default class GuildsImpl implements Guilds {
         this.db = sqliteDatabase;
     }
 
-    async get(id: number) {
+    async get(id: string) {
         return <Promise<Guild>>(new Promise((resolve, reject) => {
             this.db.serialize(() => {
                 this.db.get('SELECT * FROM Guild WHERE id=?', [id], (err, row) => {
                     if (err) return reject(err);
-                    if (!row) return resolve({ id: -1, prefix: '&' });
+                    if (!row) return resolve({ id: '', prefix: '&' });
                     return resolve(row);
                 });
             });
         }));
     }
 
-    async create(id: number, prefix: string) {
+    async create(id: string, prefix: string) {
         return <Promise<void>>(new Promise((resolve, reject) => {
             this.db.serialize(() => {
                 this.db.run('INSERT INTO Guild (id, prefix) VALUES(?, ?)', [id, prefix], (err) => {
@@ -31,7 +31,7 @@ export default class GuildsImpl implements Guilds {
         }));
     }
 
-    async remove(id: number) {
+    async remove(id: string) {
         return <Promise<void>>(new Promise((resolve, reject) => {
             this.db.serialize(() => {
                 this.db.run('DELETE FROM Guild WHERE id=?', [id], (err) => {

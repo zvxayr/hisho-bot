@@ -9,11 +9,16 @@ export const noBots: Transformer<Consumer<[Database, Message]>> = (listener) => 
 };
 
 export const usePrefix = (
-    getPrefix: (message: Message) => string,
+    getPrefix: (db: Database, message: Message) => Promise<string>,
 ): Transformer<Consumer<[Database, Message]>> => (
-    (listener) => (db, message) => {
-        if (message.content.startsWith(getPrefix(message))) listener(db, message);
+    (listener) => async (db, message) => {
+        if (message.content.startsWith(await getPrefix(db, message))) listener(db, message);
     }
 );
 
-usePrefix.fixed = (prefix: string) => usePrefix(() => prefix);
+usePrefix.fixed = (prefix: string) => usePrefix(async () => prefix);
+
+usePrefix.fromDatabase = usePrefix(async (db: Database, message: Message) => {
+    const { prefix } = await db.Guilds.get(message.guildId ?? '');
+    return prefix;
+});

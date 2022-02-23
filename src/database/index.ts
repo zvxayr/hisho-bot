@@ -1,13 +1,13 @@
 /* eslint-disable max-classes-per-file */
 export interface Guild {
-    id: number,
+    id: string,
     prefix: string,
 }
 
 export interface Guilds {
-    get: (id: number) => Promise<Guild>,
-    create: (id: number, prefix: string) => Promise<void>,
-    remove: (id: number) => Promise<void>,
+    get: (id: string) => Promise<Guild>,
+    create: (id: string, prefix: string) => Promise<void>,
+    remove: (id: string) => Promise<void>,
 }
 
 export default interface Database {
