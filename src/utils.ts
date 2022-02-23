@@ -1,4 +1,3 @@
-/* eslint-disable import/prefer-default-export */
 const raise = (error: Error) => {
     throw error;
 };
@@ -8,7 +7,7 @@ const rescue = (error: Error, type: new (...args: any[]) => Error) => {
 };
 
 const swallow = (
-    <E extends Error>(type: new (...args: any[]) => E) => (fail: (err: E) => void) => (
+    <E extends Error>(type: new (...args: any[]) => E, fail: (err: E) => void) => (
         <Args extends any[]>(fn: (...args: Args) => Promise<void>) => async (...args: Args) => {
             try {
                 await fn(...args);

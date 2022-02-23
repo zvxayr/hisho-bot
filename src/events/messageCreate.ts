@@ -12,6 +12,8 @@ const alias: {
     utter: 'say',
 };
 
+type ErrorHandler<E extends Error> = (err: E) => void;
+
 const getPatternGroupMatches = (pattern: RegExp, str: string) => pattern.exec(str)?.groups ?? {};
 
 const decomposeCommandString = (fullCommand: string) => {
@@ -38,9 +40,10 @@ const commandResponder = (db: Database, message: Message) => {
     return execute(db, message, args);
 };
 
-const safeCommandResponder = swallow(CommandNotFound)(({ source, message }) => {
+const sendErrorBack: ErrorHandler<CommandNotFound> = ({ source, message }) => {
     source.channel.send(message);
-})(commandResponder);
+};
 
+const safeCommandResponder = swallow(CommandNotFound, sendErrorBack)(commandResponder);
 const messageCreateHandler = compose(noBots, usePrefix.fromDatabase)(safeCommandResponder);
 export default messageCreateHandler;
