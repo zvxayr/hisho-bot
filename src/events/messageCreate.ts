@@ -1,5 +1,6 @@
 import { Message } from 'discord.js';
 import commands from '../commands';
+import Database from '../database';
 import { compose, raise, swallow } from '../utils';
 import { CommandNotFound } from './exceptions';
 import { noBots, usePrefix } from './guards';
@@ -26,14 +27,14 @@ const unalias = (command: string) => {
 
 const findCommand = (command: string) => commands.find(({ name }) => name === command);
 
-const commandResponder = (message: Message) => {
+const commandResponder = (db: Database, message: Message) => {
     const { command, fullArgument } = decomposeCommandString(message.content);
     const { parameterFormat, execute } = (
         findCommand(unalias(command))
         ?? raise(new CommandNotFound(command, message))
     );
     const args = getPatternGroupMatches(parameterFormat, fullArgument);
-    return execute(message, args);
+    return execute(db, message, args);
 };
 
 const safeCommandResponder = swallow(CommandNotFound)(({ source, message }) => {

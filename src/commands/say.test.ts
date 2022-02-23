@@ -1,9 +1,11 @@
 import { Message } from 'discord.js';
+import Database from '../database';
 import say from './say';
 
 const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
 describe('Execute Command Say', () => {
+    const db = typeAssert<Database>({});
     const message = typeAssert<Message>({
         channel: {
             send: jest.fn(),
@@ -11,17 +13,17 @@ describe('Execute Command Say', () => {
     });
 
     it('should call send with "Hello!"', () => {
-        say.execute(message, { text: 'Hello' });
+        say.execute(db, message, { text: 'Hello' });
         expect(message.channel.send).toHaveBeenCalledWith('Hello!');
     });
 
     it('should call send not with "!" if input is falsy', () => {
-        say.execute(message, { text: '' });
+        say.execute(db, message, { text: '' });
         expect(message.channel.send).not.toHaveBeenCalledWith('!');
     });
 
     it('should call send with the error message', () => {
-        say.execute(message, {});
+        say.execute(db, message, {});
         expect(message.channel.send).toHaveBeenCalledWith('You need to say something.');
     });
 });

@@ -1,17 +1,18 @@
 import { Message } from 'discord.js';
+import Database from '../database';
 
 type Transformer<Value> = (value: Value) => Value;
-type Listener<Event> = (event: Event) => void;
+type Consumer<Args extends any[]> = (...args: Args) => void;
 
-export const noBots: Transformer<Listener<Message>> = (listener) => (message) => {
-    if (!message.author.bot) listener(message);
+export const noBots: Transformer<Consumer<[Database, Message]>> = (listener) => (db, message) => {
+    if (!message.author.bot) listener(db, message);
 };
 
 export const usePrefix = (
     getPrefix: (message: Message) => string,
-): Transformer<Listener<Message>> => (
-    (listener) => (message) => {
-        if (message.content.startsWith(getPrefix(message))) listener(message);
+): Transformer<Consumer<[Database, Message]>> => (
+    (listener) => (db, message) => {
+        if (message.content.startsWith(getPrefix(message))) listener(db, message);
     }
 );
 
