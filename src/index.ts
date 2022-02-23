@@ -1,6 +1,7 @@
 import sourceMapSupport from 'source-map-support';
 import { Client, Intents } from 'discord.js';
 import dotenv from 'dotenv';
+import { partial } from 'ramda';
 import { messageCreateHandler } from './events';
 import SqliteDatabase from './database/sqlite';
 
@@ -22,6 +23,6 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user?.tag}!`);
 });
 
-client.on('messageCreate', messageCreateHandler.bind(null, database));
+client.on('messageCreate', partial(messageCreateHandler, [database]));
 
 client.login(process.env.token);

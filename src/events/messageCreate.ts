@@ -1,7 +1,8 @@
 import { Message } from 'discord.js';
+import { compose } from 'ramda';
 import commands from '../commands';
 import Database from '../database';
-import { compose, raise, swallow } from '../utils';
+import { raise, swallow } from '../utils';
 import { CommandNotFound } from './exceptions';
 import { noBots, usePrefix } from './guards';
 

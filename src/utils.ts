@@ -20,12 +20,7 @@ const swallow = (
     )
 );
 
-const compose = <Fn extends Function>(...fns: ((input: Fn) => Fn)[]) => (
-    (x: Fn) => fns.reduceRight((v, f) => f(v), x)
-);
-
 export {
     raise,
-    compose,
     swallow,
 };
