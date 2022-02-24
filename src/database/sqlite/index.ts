@@ -2,8 +2,9 @@
 import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
-import Database, { Guilds } from '..';
+import Database, { Aliases, Guilds } from '..';
 import GuildsImpl from './Guilds';
+import AliasesImpl from './Aliases';
 
 const doNothing = () => { };
 
@@ -12,14 +13,13 @@ export default class SqliteDatabase implements Database {
 
     readonly Guilds: Guilds;
 
+    readonly Aliases: Aliases;
+
     constructor(sqliteDatabase: sqlite3.Database) {
         this.db = sqliteDatabase;
         this.Guilds = new GuildsImpl(this.db);
+        this.Aliases = new AliasesImpl(this.db);
         this.initialize();
-    }
-
-    static create(filename: string, callback = doNothing) {
-        return new this(new sqlite3.Database(filename, callback));
     }
 
     static verbose(filename: string, callback = doNothing) {
