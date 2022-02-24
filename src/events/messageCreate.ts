@@ -6,35 +6,31 @@ import { raise, swallow } from '../utils';
 import { CommandNotFound } from './exceptions';
 import { noBots, usePrefix } from './guards';
 
-const alias: {
-    [key: string]: string;
-} = {
-    utter: 'say',
-};
-
 const getPatternGroupMatches = (pattern: RegExp, str: string) => pattern.exec(str)?.groups ?? {};
 
-const decomposeCommandString = (fullCommand: string) => {
-    const format = /^(?<prefix>\S{0,4}[!$%^&-+=<>.?~])?(?<command>\S+)?(?:\s+)?(?<fullArgument>.*)$/s;
-    const result = getPatternGroupMatches(format, fullCommand);
-    const { command, fullArgument } = result;
-    return { command, fullArgument };
+type DecomposedMessageContent = { aliasOrCommand: string, otherParameters: string };
+const decomposeMessageContent = (content: string) => {
+    const format = /^(?<prefix>\S{0,4}[!$%^&-+=<>.?~])?(?<aliasOrCommand>\S+)?(?:\s+)?(?<otherParameters>.*)$/s;
+    return <DecomposedMessageContent>getPatternGroupMatches(format, content);
 };
 
-const unalias = (command: string) => {
-    const lowerCaseCommand = command?.toLowerCase();
-    return alias[lowerCaseCommand] ?? lowerCaseCommand;
+type Unaliased = { command: string, partialParameters: string };
+const unalias = async (db: Database, guildId: string, aliasOrCommand: string) => {
+    const format = /^(?<command>\w+)(?:\s+)?(?<partialParameters>.*)/;
+    const unaliased = await db.Aliases.unalias(guildId, aliasOrCommand.toLowerCase());
+    return <Unaliased>getPatternGroupMatches(format, unaliased);
 };
 
 const findCommand = (command: string) => commands.find(({ name }) => name === command);
 
-const commandResponder = (db: Database, message: Message) => {
-    const { command, fullArgument } = decomposeCommandString(message.content);
+const commandResponder = async (db: Database, message: Message) => {
+    const { aliasOrCommand, otherParameters } = decomposeMessageContent(message.content);
+    const { command, partialParameters } = await unalias(db, message.guildId ?? '', aliasOrCommand);
     const { parameterFormat, execute } = (
-        findCommand(unalias(command))
-        ?? raise(new CommandNotFound(command, message))
+        findCommand(command) ?? raise(new CommandNotFound(aliasOrCommand, message))
     );
-    const args = getPatternGroupMatches(parameterFormat, fullArgument);
+    const fullParameters = `${partialParameters} ${otherParameters}`;
+    const args = getPatternGroupMatches(parameterFormat, fullParameters);
     return execute(db, message, args);
 };
 
