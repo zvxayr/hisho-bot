@@ -1,8 +1,7 @@
 PRAGMA foreign_keys = ON;
 
-DROP TABLE IF EXISTS Guild;
 CREATE TABLE IF NOT EXISTS Guild(
-    id TEXT NOT NULL,
-    prefix TEXT,
-    UNIQUE(id) ON CONFLICT REPLACE
+    guild_id TEXT NOT NULL PRIMARY KEY,
+    prefix TEXT NOT NULL,
+    UNIQUE(guild_id) ON CONFLICT REPLACE
 );

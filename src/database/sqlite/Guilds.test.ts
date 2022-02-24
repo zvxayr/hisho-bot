@@ -29,9 +29,9 @@ describe('test Guilds API', () => {
             sqliteDatabase.exec(`
                 DROP TABLE IF EXISTS Guild;
                 CREATE TABLE Guild(
-                    id TEXT NOT NULL,
+                    guild_id TEXT NOT NULL,
                     prefix TEXT,
-                    UNIQUE(id) ON CONFLICT REPLACE
+                    UNIQUE(guild_id) ON CONFLICT REPLACE
                 );
             `, res);
         }));
@@ -43,21 +43,21 @@ describe('test Guilds API', () => {
         });
 
         it('should succeed on getting existing guilds', async () => {
-            expect(await Guilds.get('1')).toEqual({ id: '1', prefix: '&' });
+            expect(await Guilds.get('1')).toEqual({ guild_id: '1', prefix: '&' });
         });
 
         it('should return null object on getting non-existent guilds', async () => {
-            expect(await Guilds.get('2')).toHaveProperty('id', '');
+            expect(await Guilds.get('2')).toHaveProperty('guild_id', '');
         });
 
         it('should modify existing guild', async () => {
             expect(await Guilds.create('1', '^')).toBeUndefined();
-            expect(await Guilds.get('1')).toEqual({ id: '1', prefix: '^' });
+            expect(await Guilds.get('1')).toEqual({ guild_id: '1', prefix: '^' });
         });
 
-        it('should remove existing guid', async () => {
+        it('should remove existing guild', async () => {
             expect(await Guilds.remove('1')).toBeUndefined();
-            expect(await Guilds.get('1')).toHaveProperty('id', '');
+            expect(await Guilds.get('1')).toHaveProperty('guild_id', '');
         });
 
         it('should sliently fail when removing nothing', async () => {
