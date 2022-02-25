@@ -15,8 +15,10 @@ const mockCommands: { [key: string]: Command } = {
         name: 'has_number',
         parameterFormat: /(?<numberParam>\d+)/,
         execute: async (_db, message, { numberParam }) => {
-            if (numberParam) message.channel.send(`Yey, a number! [${numberParam}]`);
-            message.channel.send('Give me a number!');
+            const response = numberParam
+                ? `Yey, a number! [${numberParam}]`
+                : 'Give me a number!';
+            await message.channel.send(response);
         },
     },
 };
@@ -35,8 +37,8 @@ describe('Test command responder', () => {
     const db = SqliteDatabase.verbose(':memory:');
 
     beforeAll(async () => {
-        db.Guilds.create('1', '');
-        db.Aliases.create('1', 'has_number a1', 'take1!');
+        await db.Guilds.create('1', '');
+        await db.Aliases.create('1', 'has_number a1', 'take1!');
     });
 
     it('should be called with correct command', async () => {

@@ -6,7 +6,7 @@ type Consumer<Args extends any[]> = (...args: Args) => Promise<void>;
 
 export const noBots: Transformer<Consumer<[Database, Message]>> = (
     (listener) => async (db, message) => {
-        if (!message.author.bot) listener(db, message);
+        if (!message.author.bot) await listener(db, message);
     }
 );
 
@@ -14,11 +14,11 @@ export const usePrefix = (
     getPrefix: (db: Database, message: Message) => Promise<string>,
 ): Transformer<Consumer<[Database, Message]>> => (
     (listener) => async (db, message) => {
-        if (message.content.startsWith(await getPrefix(db, message))) listener(db, message);
+        if (message.content.startsWith(await getPrefix(db, message))) await listener(db, message);
     }
 );
 
-usePrefix.fixed = (prefix: string) => usePrefix(async () => prefix);
+usePrefix.fixed = (prefix: string) => usePrefix(() => Promise.resolve(prefix));
 
 usePrefix.fromDatabase = usePrefix(async (db: Database, message: Message) => {
     const { prefix } = await db.Guilds.get(message.guildId as string);
