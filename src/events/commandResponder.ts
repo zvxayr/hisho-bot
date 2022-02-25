@@ -6,7 +6,7 @@ import { CommandNotFound } from './exceptions';
 
 const getPatternGroupMatches = (pattern: RegExp, str: string) => pattern.exec(str)?.groups ?? {};
 
-type DecomposedMessageContent = { aliasOrCommand: string, otherParameters: string };
+type DecomposedMessageContent = { aliasOrCommand?: string, otherParameters: string };
 const decomposeMessageContent = (content: string) => {
     const format = /^(?<prefix>\S{0,4}[!$%^&-+=<>.?~])?(?<aliasOrCommand>\S+)?(?:\s+)?(?<otherParameters>.*)$/s;
     return <DecomposedMessageContent>getPatternGroupMatches(format, content);
@@ -22,7 +22,7 @@ const unalias = async (db: Database, guildId: string, aliasOrCommand: string) =>
 
 export default (commandResolver: (command: string) => Command | undefined) => (
     async function commandResponder(db: Database, message: Message) {
-        const { aliasOrCommand, otherParameters } = decomposeMessageContent(message.content);
+        const { aliasOrCommand = '', otherParameters } = decomposeMessageContent(message.content);
         const { command, partialParameters } = await unalias(db, message.guildId ?? '', aliasOrCommand);
         const { parameterFormat, execute } = (
             commandResolver(command) ?? raise(new CommandNotFound(aliasOrCommand, message))

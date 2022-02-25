@@ -70,6 +70,11 @@ describe('Test command responder', () => {
         await expect(responder(db, message)).rejects.toBeDefined();
     });
 
+    it('should reject if command is empty', async () => {
+        const message = createMessage('');
+        await expect(responder(db, message)).rejects.toBeDefined();
+    });
+
     it('should respond success on aliases', async () => {
         const message = createMessage('take1!');
         await expect(responder(db, message)).resolves.toBeUndefined();
