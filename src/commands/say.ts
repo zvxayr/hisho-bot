@@ -1,8 +1,8 @@
-import { Command } from './types';
+import { Command, StringValuedObject } from './types';
 
-const say: Command = {
+const say: Command<StringValuedObject<['text']>> = {
     name: 'say',
-    parameterFormat: /^(?<text>.+)?$/s,
+    parseParameters: (paramString) => ({ text: paramString }),
     async execute(_, message, { text }) {
         await message.channel.send(text ? `${text}!` : 'You need to say something.');
     },

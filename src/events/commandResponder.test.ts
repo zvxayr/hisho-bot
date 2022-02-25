@@ -1,19 +1,22 @@
 import { Message } from 'discord.js';
 import { Command } from '../commands';
 import SqliteDatabase from '../database/sqlite';
-import commandResponder from './commandResponder';
+import commandResponder, { getPatternGroupMatches } from './commandResponder';
 
 const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
 const mockCommands: { [key: string]: Command } = {
-    do_nothing: {
+    do_nothing: <Command<void>>{
         name: 'do_nothing',
-        parameterFormat: /(?:)/,
+        parseParameters: () => { },
         execute: jest.fn(),
     },
-    has_number: {
+    has_number: <Command<{ numberParam: string | undefined }>>{
         name: 'has_number',
-        parameterFormat: /(?<numberParam>\d+)/,
+        parseParameters: (parameterString) => {
+            const { numberParam } = getPatternGroupMatches(/(?<numberParam>\d+)/, parameterString);
+            return { numberParam };
+        },
         execute: async (_db, message, { numberParam }) => {
             const response = numberParam
                 ? `Yey, a number! [${numberParam}]`
@@ -44,13 +47,13 @@ describe('Test command responder', () => {
     it('should be called with correct command', async () => {
         const message = createMessage('do_nothing');
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, {});
+        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, undefined);
     });
 
     it('should ignore extra parameters', async () => {
         const message = createMessage('do_nothing ignore me');
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, {});
+        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, undefined);
     });
 
     it('should respond with error message to non-numeric inputs', async () => {
@@ -84,6 +87,6 @@ describe('Test command responder', () => {
     it('should still succeed for falsy guild ids', async () => {
         const message = createMessage('do_nothing', null);
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, {});
+        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, undefined);
     });
 });

@@ -17,13 +17,8 @@ describe('Execute Command Say', () => {
         expect(message.channel.send).toHaveBeenCalledWith('Hello!');
     });
 
-    it('should call send not with "!" if input is falsy', () => {
-        say.execute(db, message, { text: '' });
-        expect(message.channel.send).not.toHaveBeenCalledWith('!');
-    });
-
     it('should call send with the error message', () => {
-        say.execute(db, message, {});
+        say.execute(db, message, { text: '' });
         expect(message.channel.send).toHaveBeenCalledWith('You need to say something.');
     });
 });
