@@ -9,15 +9,15 @@ describe('test Guilds API', () => {
         afterAll(() => sqliteDatabase.close());
 
         it('should return an error on create', async () => {
-            expect(Guilds.create('1', '&')).rejects.toBeDefined();
+            await expect(Guilds.create('1', '&')).rejects.toBeDefined();
         });
 
-        it('should return an error on get', () => {
-            expect(Guilds.get('1')).rejects.toBeDefined();
+        it('should return an error on get', async () => {
+            await expect(Guilds.get('1')).rejects.toBeDefined();
         });
 
-        it('should return an error on remove', () => {
-            expect(Guilds.remove('1')).rejects.toBeDefined();
+        it('should return an error on remove', async () => {
+            await expect(Guilds.remove('1')).rejects.toBeDefined();
         });
     });
 

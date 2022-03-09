@@ -9,15 +9,15 @@ describe('test Aliases API', () => {
         afterAll(() => sqliteDatabase.close());
 
         it('should return an error on unalias', async () => {
-            expect(Aliases.unalias('1', 'h')).rejects.toBeDefined();
+            await expect(Aliases.unalias('1', 'h')).rejects.toBeDefined();
         });
 
-        it('should return an error on create', () => {
-            expect(Aliases.create('1', 'help', 'h')).rejects.toBeDefined();
+        it('should return an error on create', async () => {
+            await expect(Aliases.create('1', 'help', 'h')).rejects.toBeDefined();
         });
 
-        it('should return an error on remove', () => {
-            expect(Aliases.remove('1', 'h')).rejects.toBeDefined();
+        it('should return an error on remove', async () => {
+            await expect(Aliases.remove('1', 'h')).rejects.toBeDefined();
         });
     });
 
@@ -67,7 +67,7 @@ describe('test Aliases API', () => {
         });
 
         it('should silently fail when removing non-existent data', async () => {
-            expect(Aliases.remove('2', 'xxx')).resolves.toBeUndefined();
+            await expect(Aliases.remove('2', 'xxx')).resolves.toBeUndefined();
         });
     });
 });
