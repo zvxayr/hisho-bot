@@ -1,28 +1,17 @@
 import { Message } from 'discord.js';
 import { Command } from '../commands';
 import SqliteDatabase from '../database/sqlite';
-import commandResponder, { getPatternGroupMatches } from './commandResponder';
+import commandResponder from './commandResponder';
 
 const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
 const mockCommands: { [key: string]: Command } = {
-    do_nothing: <Command<void>>{
-        name: 'do_nothing',
-        parseParameters: () => { },
-        execute: jest.fn(),
-    },
-    has_number: <Command<{ numberParam: string | undefined }>>{
-        name: 'has_number',
-        parseParameters: (parameterString) => {
-            const { numberParam } = getPatternGroupMatches(/(?<numberParam>\d+)/, parameterString);
-            return { numberParam };
-        },
-        execute: async (_db, message, { numberParam }) => {
-            const response = numberParam
-                ? `Yey, a number! [${numberParam}]`
-                : 'Give me a number!';
-            await message.channel.send(response);
-        },
+    echo: <Command<string>>{
+        name: 'echo',
+        parseParameters: jest.fn((x) => x),
+        execute: jest.fn(async (db, message, input) => {
+            await message.channel.send(input);
+        }),
     },
 };
 
@@ -41,52 +30,42 @@ describe('Test command responder', () => {
 
     beforeAll(async () => {
         await db.Guilds.create('1', '');
-        await db.Aliases.create('1', 'has_number a1', 'take1!');
+        await db.Aliases.create('1', 'echo', 'e');
     });
 
     it('should be called with correct command', async () => {
-        const message = createMessage('do_nothing');
+        const message = createMessage('echo');
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, undefined);
-    });
-
-    it('should ignore extra parameters', async () => {
-        const message = createMessage('do_nothing ignore me');
-        await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, undefined);
-    });
-
-    it('should respond with error message to non-numeric inputs', async () => {
-        const message = createMessage('has_number i dont have a number');
-        await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(send).toHaveBeenCalledWith('Give me a number!');
-    });
-
-    it('should respond success if message has a number', async () => {
-        const message = createMessage('has_number i got 1');
-        await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(send).toHaveBeenCalledWith('Yey, a number! [1]');
+        expect(mockCommands.echo.parseParameters).toBeCalledWith('');
+        expect(mockCommands.echo.execute).toBeCalledWith(db, message, '');
+        expect(send).toBeCalledWith('');
     });
 
     it('should reject if command does not exist', async () => {
         const message = createMessage('not_a_command');
         await expect(responder(db, message)).rejects.toBeDefined();
+        expect(send).not.toBeCalled();
     });
 
     it('should reject if command is empty', async () => {
         const message = createMessage('');
         await expect(responder(db, message)).rejects.toBeDefined();
+        expect(send).not.toBeCalled();
     });
 
-    it('should respond success on aliases', async () => {
-        const message = createMessage('take1!');
+    it('should respond with aliases', async () => {
+        const message = createMessage('e hello');
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(send).toHaveBeenCalledWith('Yey, a number! [1]');
+        expect(mockCommands.echo.parseParameters).toBeCalledWith('hello');
+        expect(mockCommands.echo.execute).toBeCalledWith(db, message, 'hello');
+        expect(send).toBeCalledWith('hello');
     });
 
     it('should still succeed for falsy guild ids', async () => {
-        const message = createMessage('do_nothing', null);
+        const message = createMessage('echo', null);
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.do_nothing.execute).toBeCalledWith(db, message, undefined);
+        expect(mockCommands.echo.parseParameters).toBeCalledWith('');
+        expect(mockCommands.echo.execute).toBeCalledWith(db, message, '');
+        expect(send).toBeCalledWith('');
     });
 });
