@@ -3,7 +3,7 @@ import commands from '../commands';
 import { swallow } from '../utils';
 import commandResponder from './commandResponder';
 import { CommandNotFound } from './exceptions';
-import { noBots, usePrefix } from './guards';
+import { blockBots, usePrefix } from './guards';
 
 const resolveCommand = (command: string) => commands.find(({ name }) => name === command);
 const sendErrorBack = ({ source, message }: CommandNotFound) => {
@@ -14,5 +14,5 @@ const safeCommandResponder = (
     swallow(CommandNotFound, sendErrorBack)(commandResponder(resolveCommand))
 );
 
-const messageCreateHandler = compose(noBots, usePrefix.fromDatabase)(safeCommandResponder);
+const messageCreateHandler = compose(blockBots, usePrefix.fromDatabase)(safeCommandResponder);
 export default messageCreateHandler;

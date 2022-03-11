@@ -4,7 +4,7 @@ import Database from '../database';
 type Transformer<Value> = (value: Value) => Value;
 type Consumer<Args extends any[]> = (...args: Args) => Promise<void>;
 
-export const noBots: Transformer<Consumer<[Database, Message]>> = (
+export const blockBots: Transformer<Consumer<[Database, Message]>> = (
     (listener) => async (db, message) => {
         if (!message.author.bot) await listener(db, message);
     }

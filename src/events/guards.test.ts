@@ -1,6 +1,6 @@
 import { Message } from 'discord.js';
 import SqliteDatabase from '../database/sqlite';
-import { noBots, usePrefix } from './guards';
+import { blockBots, usePrefix } from './guards';
 
 const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
@@ -15,12 +15,12 @@ describe('Test guards', () => {
 
     describe('test noBots', () => {
         it('should not allow bots', async () => {
-            await noBots(listener)(db, createMessage({ bot: true }));
+            await blockBots(listener)(db, createMessage({ bot: true }));
             expect(listener).not.toHaveBeenCalled();
         });
 
         it('should allow non-bots', async () => {
-            await noBots(listener)(db, createMessage({ bot: false }));
+            await blockBots(listener)(db, createMessage({ bot: false }));
             expect(listener).toHaveBeenCalled();
         });
     });
