@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { Command } from '../commands';
+import { ICommand } from '../commands/types';
 import Database from '../database';
 import { raise } from '../utils';
 import { CommandNotFound } from './exceptions';
@@ -21,15 +21,20 @@ const unalias = async (db: Database, guildId: string, aliasOrCommand: string) =>
     return { command: aliasOrCommand, partialParameters: '' };
 };
 
-export default (commandResolver: (command: string) => Command | undefined) => (
+async function parseMessage(db: Database, message: Message) {
+    const { aliasOrCommand = '', otherParameters } = decomposeMessageContent(message.content);
+    const { command, partialParameters } = await unalias(db, message!.guildId ?? '', aliasOrCommand);
+    const fullParameters = `${partialParameters} ${otherParameters}`.trimStart();
+
+    return { command, fullParameters };
+}
+
+export default (commandResolver: (command: string) => ICommand | undefined) => (
     async function commandResponder(db: Database, message: Message) {
-        const { aliasOrCommand = '', otherParameters } = decomposeMessageContent(message.content);
-        const { command, partialParameters } = await unalias(db, message.guildId ?? '', aliasOrCommand);
-        const { parseParameters, execute } = (
-            commandResolver(command) ?? raise(new CommandNotFound(aliasOrCommand, message))
+        const { command, fullParameters } = await parseMessage(db, message);
+        const { execute } = (
+            commandResolver(command) ?? raise(new CommandNotFound(command, message))
         );
-        const fullParameters = `${partialParameters} ${otherParameters}`.trimStart();
-        const args = parseParameters(fullParameters);
-        return execute(db, message, args);
+        return execute(db, message, fullParameters);
     }
 );

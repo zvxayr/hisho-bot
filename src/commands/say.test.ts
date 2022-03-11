@@ -13,12 +13,12 @@ describe('Execute Command Say', () => {
     });
 
     it('should call send with "Hello!"', () => {
-        say.execute(db, message, { text: 'Hello' });
+        say.execute(db, message, 'Hello');
         expect(message.channel.send).toHaveBeenCalledWith('Hello!');
     });
 
     it('should call send with the error message', () => {
-        say.execute(db, message, { text: '' });
+        say.execute(db, message, '');
         expect(message.channel.send).toHaveBeenCalledWith('You need to say something.');
     });
 });

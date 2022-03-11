@@ -1,19 +1,19 @@
 import { Message } from 'discord.js';
-import { Command } from '../commands';
+import Command from '../commands/command';
 import SqliteDatabase from '../database/sqlite';
 import commandResponder from './commandResponder';
 
 const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
-const mockCommands: { [key: string]: Command } = {
-    echo: <Command<string>>{
-        name: 'echo',
-        parseParameters: jest.fn((x) => x),
-        execute: jest.fn(async (db, message, input) => {
-            await message.channel.send(input);
-        }),
-    },
+const echo = {
+    name: 'echo',
+    parseParameters: jest.fn((x) => x),
+    execute: jest.fn(async (db, message, input) => {
+        await message.channel.send(input);
+    }),
 };
+
+const mockCommands: { [key: string]: Command } = { echo: new Command<string>(echo) };
 
 const send = jest.fn();
 const createMessage = (content: string, guildId: string | null = '1') => typeAssert<Message>({
@@ -36,8 +36,8 @@ describe('Test command responder', () => {
     it('should be called with correct command', async () => {
         const message = createMessage('echo');
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.echo.parseParameters).toBeCalledWith('');
-        expect(mockCommands.echo.execute).toBeCalledWith(db, message, '');
+        expect(echo.parseParameters).toBeCalledWith('');
+        expect(echo.execute).toBeCalledWith(db, message, '');
         expect(send).toBeCalledWith('');
     });
 
@@ -56,16 +56,16 @@ describe('Test command responder', () => {
     it('should respond with aliases', async () => {
         const message = createMessage('e hello');
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.echo.parseParameters).toBeCalledWith('hello');
-        expect(mockCommands.echo.execute).toBeCalledWith(db, message, 'hello');
+        expect(echo.parseParameters).toBeCalledWith('hello');
+        expect(echo.execute).toBeCalledWith(db, message, 'hello');
         expect(send).toBeCalledWith('hello');
     });
 
     it('should still succeed for falsy guild ids', async () => {
         const message = createMessage('echo', null);
         await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(mockCommands.echo.parseParameters).toBeCalledWith('');
-        expect(mockCommands.echo.execute).toBeCalledWith(db, message, '');
+        expect(echo.parseParameters).toBeCalledWith('');
+        expect(echo.execute).toBeCalledWith(db, message, '');
         expect(send).toBeCalledWith('');
     });
 });

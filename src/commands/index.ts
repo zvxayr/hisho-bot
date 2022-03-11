@@ -1,9 +1,8 @@
 import say from './say';
-import { Command } from './types';
+import { ICommand } from './types';
 
-const commands: Command[] = [
+const commands: ICommand[] = [
     say,
 ];
 
 export default commands;
-export { Command };
