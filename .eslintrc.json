@@ -18,6 +18,7 @@
     ],
     "rules": {
         "indent": "off",
+        "max-len": ["error", { "code": 120, "ignoreStrings": true }],
         "@typescript-eslint/indent": ["error", 4],
         "no-restricted-syntax": "off",
         "func-names": ["error", "as-needed"],
