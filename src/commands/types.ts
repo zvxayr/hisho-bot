@@ -9,10 +9,10 @@ export type StringValuedObject<Keys extends readonly string[]> = SameValuedObjec
 
 export interface ICommand<Params = any> {
     name: string;
-    parseParameters: (parameterString: string) => Params;
+    parseParameters: (parameter: string) => Params;
     execute: (
         db: Database,
         message: Message,
-        parameterString: string,
+        parameter: string,
     ) => Promise<void>;
 }
