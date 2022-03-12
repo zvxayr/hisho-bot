@@ -4,7 +4,7 @@ import Database from '../database';
 import { raise } from '../utils';
 import { CommandNotFound } from './exceptions';
 
-export const getPatternGroupMatches = (pattern: RegExp, str: string) => (
+const getPatternGroupMatches = (pattern: RegExp, str: string) => (
     pattern.exec(str)?.groups ?? {});
 
 type DecomposedMessageContent = { aliasOrCommand?: string, otherParameters: string };
@@ -23,18 +23,19 @@ const unalias = async (db: Database, guildId: string, aliasOrCommand: string) =>
 
 async function parseMessage(db: Database, message: Message) {
     const { aliasOrCommand = '', otherParameters } = decomposeMessageContent(message.content);
-    const { command, partialParameters } = await unalias(db, message!.guildId ?? '', aliasOrCommand);
-    const fullParameters = `${partialParameters} ${otherParameters}`.trimStart();
+    if (message.guildId === null) {
+        return { command: aliasOrCommand, parameters: otherParameters };
+    }
 
-    return { command, fullParameters };
+    const { command, partialParameters } = await unalias(db, message.guildId, aliasOrCommand);
+    const parameters = `${partialParameters} ${otherParameters}`.trimStart();
+    return { command, parameters };
 }
 
 export default (commandResolver: (command: string) => ICommand | undefined) => (
     async function commandResponder(db: Database, message: Message) {
-        const { command, fullParameters } = await parseMessage(db, message);
-        const { execute } = (
-            commandResolver(command) ?? raise(new CommandNotFound(command, message))
-        );
-        return execute(db, message, fullParameters);
+        const { command, parameters } = await parseMessage(db, message);
+        const { execute } = commandResolver(command) ?? raise(new CommandNotFound(command, message));
+        return execute(db, message, parameters);
     }
 );
