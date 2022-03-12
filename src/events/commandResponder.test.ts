@@ -2,29 +2,24 @@ import { Message } from 'discord.js';
 import Command from '../commands/command';
 import SqliteDatabase from '../database/sqlite';
 import commandResponder from './commandResponder';
+import { CommandNotFound } from './exceptions';
 
 const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
 const echo = {
     name: 'echo',
-    parseParameters: jest.fn((x) => x),
-    execute: jest.fn(async (db, message, input) => {
-        await message.channel.send(input);
-    }),
+    parseParameters: jest.fn(),
+    execute: jest.fn(),
 };
 
-const mockCommands: { [key: string]: Command } = { echo: new Command<string>(echo) };
-
-const send = jest.fn();
 const createMessage = (content: string, guildId: string | null = '1') => typeAssert<Message>({
     content,
     guildId,
-    channel: { send },
 });
 
-const mockCommandResolver = (command: string) => mockCommands[command];
+const mockCommandResolver = (command: string) => (command === 'echo' ? new Command<string>(echo) : undefined);
 
-describe('Test command responder', () => {
+describe('commandResponder', () => {
     const responder = commandResponder(mockCommandResolver);
     const db = SqliteDatabase.verbose(':memory:');
 
@@ -33,39 +28,39 @@ describe('Test command responder', () => {
         await db.Aliases.create('1', 'echo', 'e');
     });
 
-    it('should be called with correct command', async () => {
+    it('calls the parse and execute methods of resolved commands', async () => {
         const message = createMessage('echo');
-        await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(echo.parseParameters).toBeCalledWith('');
-        expect(echo.execute).toBeCalledWith(db, message, '');
-        expect(send).toBeCalledWith('');
+        await responder(db, message);
+        expect(echo.parseParameters).toBeCalled();
+        expect(echo.execute).toBeCalled();
     });
 
-    it('should reject if command does not exist', async () => {
+    it('throws a CommandNotFound error if command is not resolved', async () => {
         const message = createMessage('not_a_command');
-        await expect(responder(db, message)).rejects.toBeDefined();
-        expect(send).not.toBeCalled();
+        await expect(responder(db, message)).rejects.toEqual(new CommandNotFound('not_a_command', message));
     });
 
-    it('should reject if command is empty', async () => {
+    it('throws a CommandNotFound error if command is empty', async () => {
         const message = createMessage('');
-        await expect(responder(db, message)).rejects.toBeDefined();
-        expect(send).not.toBeCalled();
+        await expect(responder(db, message)).rejects.toEqual(new CommandNotFound('', message));
     });
 
-    it('should respond with aliases', async () => {
-        const message = createMessage('e hello');
-        await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(echo.parseParameters).toBeCalledWith('hello');
-        expect(echo.execute).toBeCalledWith(db, message, 'hello');
-        expect(send).toBeCalledWith('hello');
+    it('calls the parse and execute methods of aliased commands', async () => {
+        const message = createMessage('e');
+        await responder(db, message);
+        expect(echo.parseParameters).toBeCalled();
+        expect(echo.execute).toBeCalled();
     });
 
-    it('should still succeed for falsy guild ids', async () => {
+    it('throws a CommandNotFound error if command is not resolved for non-guild commands', async () => {
+        const message = createMessage('not_a_command', null);
+        await expect(responder(db, message)).rejects.toEqual(new CommandNotFound('e', message));
+    });
+
+    it('calls the parse and execute methods for non-guild commands', async () => {
         const message = createMessage('echo', null);
-        await expect(responder(db, message)).resolves.toBeUndefined();
-        expect(echo.parseParameters).toBeCalledWith('');
-        expect(echo.execute).toBeCalledWith(db, message, '');
-        expect(send).toBeCalledWith('');
+        await responder(db, message);
+        expect(echo.parseParameters).toBeCalled();
+        expect(echo.execute).toBeCalled();
     });
 });

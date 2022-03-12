@@ -4,7 +4,7 @@ import say from './say';
 
 const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
-describe('Execute Command Say', () => {
+describe('Command: say', () => {
     const db = typeAssert<Database>({});
     const message = typeAssert<Message>({
         channel: {
@@ -12,12 +12,12 @@ describe('Execute Command Say', () => {
         },
     });
 
-    it('should call send with "Hello!"', () => {
+    it('sends the message back with an exclamation point appended', () => {
         say.execute(db, message, 'Hello');
         expect(message.channel.send).toHaveBeenCalledWith('Hello!');
     });
 
-    it('should call send with the error message', () => {
+    it('sends an error message if the input is empty', () => {
         say.execute(db, message, '');
         expect(message.channel.send).toHaveBeenCalledWith('You need to say something.');
     });
