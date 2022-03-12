@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import Command from '../commands/command';
+import createCommand from '../commands/command';
 import SqliteDatabase from '../database/sqlite';
 import commandResponder from './commandResponder';
 import { CommandNotFound } from './exceptions';
@@ -17,7 +17,7 @@ const createMessage = (content: string, guildId: string | null = '1') => typeAss
     guildId,
 });
 
-const mockCommandResolver = (command: string) => (command === 'echo' ? new Command<string>(echo) : undefined);
+const mockCommandResolver = (command: string) => (command === 'echo' ? createCommand<string>(echo) : undefined);
 
 describe('commandResponder', () => {
     const responder = commandResponder(mockCommandResolver);

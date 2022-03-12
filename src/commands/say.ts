@@ -1,7 +1,7 @@
-import Command from './command';
+import createCommand from './command';
 import { StringValuedObject } from './types';
 
-const say = new Command<StringValuedObject<['text']>>({
+const say = createCommand<StringValuedObject<['text']>>({
     name: 'say',
     parseParameters: (paramString) => ({ text: paramString }),
     async execute(_, message, { text }) {

@@ -7,9 +7,8 @@ export type SameValuedObject<Keys extends readonly string[], Value> = {
 
 export type StringValuedObject<Keys extends readonly string[]> = SameValuedObject<Keys, string>;
 
-export interface ICommand<Params = any> {
+export interface ICommand {
     name: string;
-    parseParameters: (parameter: string) => Params;
     execute: (
         db: Database,
         message: Message,
