@@ -54,7 +54,7 @@ describe('commandResponder', () => {
 
     it('throws a CommandNotFound error if command is not resolved for non-guild commands', async () => {
         const message = createMessage('not_a_command', null);
-        await expect(responder(db, message)).rejects.toEqual(new CommandNotFound('e', message));
+        await expect(responder(db, message)).rejects.toEqual(new CommandNotFound('not_a_command', message));
     });
 
     it('calls the parse and execute methods for non-guild commands', async () => {
