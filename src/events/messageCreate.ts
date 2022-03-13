@@ -5,7 +5,7 @@ import commandResponder from './commandResponder';
 import { CommandNotFound } from './exceptions';
 import { blockBots, usePrefix } from './guards';
 
-const resolveCommand = (command: string) => commands.find(({ name }) => name === command);
+const resolveCommand = (command: string) => commands[command];
 const sendErrorBack = ({ source, message }: CommandNotFound) => {
     source.channel.send(message);
 };
