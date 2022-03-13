@@ -1,5 +1,4 @@
 import { Message } from 'discord.js';
-import createCommand from '../commands/command';
 import SqliteDatabase from '../database/sqlite';
 import commandResponder from './commandResponder';
 import { CommandNotFound } from './exceptions';
@@ -8,7 +7,6 @@ const typeAssert = <T>(value: any): T => (value as unknown) as T;
 
 const echo = {
     name: 'echo',
-    parseParameters: jest.fn(),
     execute: jest.fn(),
 };
 
@@ -17,7 +15,7 @@ const createMessage = (content: string, guildId: string | null = '1') => typeAss
     guildId,
 });
 
-const mockCommandResolver = (command: string) => (command === 'echo' ? createCommand<string>(echo) : undefined);
+const mockCommandResolver = (command: string) => (command === 'echo' ? echo : undefined);
 
 describe('commandResponder', () => {
     const responder = commandResponder(mockCommandResolver);
@@ -28,10 +26,9 @@ describe('commandResponder', () => {
         await db.Aliases.create('1', 'echo', 'e');
     });
 
-    it('calls the parse and execute methods of resolved commands', async () => {
+    it('calls the execute method of resolved commands', async () => {
         const message = createMessage('echo');
         await responder(db, message);
-        expect(echo.parseParameters).toBeCalled();
         expect(echo.execute).toBeCalled();
     });
 
@@ -45,10 +42,9 @@ describe('commandResponder', () => {
         await expect(responder(db, message)).rejects.toEqual(new CommandNotFound('', message));
     });
 
-    it('calls the parse and execute methods of aliased commands', async () => {
+    it('calls the execute method of aliased commands', async () => {
         const message = createMessage('e');
         await responder(db, message);
-        expect(echo.parseParameters).toBeCalled();
         expect(echo.execute).toBeCalled();
     });
 
@@ -57,10 +53,9 @@ describe('commandResponder', () => {
         await expect(responder(db, message)).rejects.toEqual(new CommandNotFound('not_a_command', message));
     });
 
-    it('calls the parse and execute methods for non-guild commands', async () => {
+    it('calls the execute method of non-guild commands', async () => {
         const message = createMessage('echo', null);
         await responder(db, message);
-        expect(echo.parseParameters).toBeCalled();
         expect(echo.execute).toBeCalled();
     });
 });
