@@ -1,5 +1,5 @@
 import { Message } from 'discord.js';
-import { ICommand } from '../commands/types';
+import { CommandResolver } from '../commands/types';
 import Database from '../database';
 import { raise } from '../utils';
 import { CommandNotFound } from './exceptions';
@@ -32,10 +32,10 @@ async function parseMessage(db: Database, message: Message) {
     return { command, parameters };
 }
 
-export default (commandResolver: (command: string) => ICommand | undefined) => (
+export default (commandResolver: CommandResolver) => (
     async function commandResponder(database: Database, message: Message) {
         const { command, parameters } = await parseMessage(database, message);
         const { execute } = commandResolver(command) ?? raise(new CommandNotFound(command, message));
-        return execute({ database, message }, parameters);
+        return execute({ database, message, commandResolver }, parameters);
     }
 );
