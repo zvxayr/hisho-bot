@@ -33,9 +33,9 @@ async function parseMessage(db: Database, message: Message) {
 }
 
 export default (commandResolver: (command: string) => ICommand | undefined) => (
-    async function commandResponder(db: Database, message: Message) {
-        const { command, parameters } = await parseMessage(db, message);
+    async function commandResponder(database: Database, message: Message) {
+        const { command, parameters } = await parseMessage(database, message);
         const { execute } = commandResolver(command) ?? raise(new CommandNotFound(command, message));
-        return execute(db, message, parameters);
+        return execute({ database, message }, parameters);
     }
 );

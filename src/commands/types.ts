@@ -7,11 +7,15 @@ export type SameValuedObject<Keys extends readonly string[], Value> = {
 
 export type StringValuedObject<Keys extends readonly string[]> = SameValuedObject<Keys, string>;
 
+export interface Context {
+    database: Database,
+    message: Message,
+}
+
 export interface ICommand {
     name: string;
     execute: (
-        db: Database,
-        message: Message,
+        context: Context,
         parameter: string,
     ) => Promise<void>;
 }
