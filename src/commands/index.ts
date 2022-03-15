@@ -1,7 +1,9 @@
+import alias from './alias';
 import say from './say';
 import { CommandMap, ICommand } from './types';
 
 const commandsList: ICommand[] = [
+    alias,
     say,
 ];
 
