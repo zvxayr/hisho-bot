@@ -26,9 +26,8 @@ async function parseMessage(db: Database, message: Message) {
     if (message.guildId === null) {
         return { command: aliasOrCommand, parameters: otherParameters };
     }
-
     const { command, partialParameters } = await unalias(db, message.guildId, aliasOrCommand);
-    const parameters = `${partialParameters} ${otherParameters}`.trimStart();
+    const parameters = `${partialParameters} ${otherParameters}`.trim();
     return { command, parameters };
 }
 
