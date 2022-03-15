@@ -1,12 +1,9 @@
-/* eslint-disable max-classes-per-file */
 import sqlite3 from 'sqlite3';
 import fs from 'fs';
 import path from 'path';
 import Database, { Aliases, Guilds } from '..';
 import GuildsImpl from './Guilds';
 import AliasesImpl from './Aliases';
-
-const doNothing = () => { };
 
 export default class SqliteDatabase implements Database {
     private readonly db: sqlite3.Database;
@@ -22,7 +19,7 @@ export default class SqliteDatabase implements Database {
         this.initialize();
     }
 
-    static verbose(filename: string, callback = doNothing) {
+    static verbose(filename: string, callback?: ((err: Error | null) => void)) {
         return new this(new (sqlite3.verbose()).Database(filename, callback));
     }
 

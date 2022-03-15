@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 export interface Guild {
     guild_id: string,
     prefix: string,
