@@ -21,10 +21,7 @@ describe('createCommand', () => {
 
     it('calls the execute method of the input with the output of the parseParameters', async () => {
         await listify.execute(context, 'Hello World!');
-        await listify.execute(context, "I'm alive!");
-        await listify.execute(context, '');
-        for (const parseParametersReturn of listifyRaw.parseParameters.mock.results) {
-            expect(listifyRaw.execute).toHaveBeenCalledWith(context, parseParametersReturn.value);
-        }
+        expect(listifyRaw.execute)
+            .toHaveBeenCalledWith(context, listifyRaw.parseParameters.mock.results[0].value);
     });
 });
