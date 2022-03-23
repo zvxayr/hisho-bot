@@ -1,4 +1,4 @@
-import { compose } from 'ramda';
+import { compose, curry } from 'ramda';
 import commands from '../commands';
 import { swallow } from '../utils';
 import commandResponder from './commandResponder';
@@ -15,4 +15,4 @@ const safeCommandResponder = (
 );
 
 const messageCreateHandler = compose(blockBots, usePrefix.fromDatabase)(safeCommandResponder);
-export default messageCreateHandler;
+export default curry(messageCreateHandler);
